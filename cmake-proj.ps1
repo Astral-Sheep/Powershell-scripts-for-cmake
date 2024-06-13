@@ -85,7 +85,7 @@ if (-not (Test-Path .\$projectName\dependencies))
 	NewDir .\$projectName\dependencies
 }
 
-# CMakeLists
+# Files
 if ($outputType -eq "lib")
 {
 	$projectAdd = @"
@@ -173,6 +173,17 @@ target_include_directories(`${PROJECT_NAME} PRIVATE
 	`${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+"@
+}
+
+if (-not (Test-Path -Path .\$projectName\.gitignore))
+{
+	NewItem .\$projectName\.gitignore
+	Add-Content .\$projectName\.gitignore @"
+.cache/
+bin/
+build.ps1
+compile_commands.json
 "@
 }
 

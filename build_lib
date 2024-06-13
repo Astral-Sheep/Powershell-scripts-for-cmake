@@ -1,0 +1,118 @@
+function Build($Arch, $Type, $Shared, [string]$Path, [string]$Destination)
+{
+	try
+	{
+		cmake-build -a $Arch -t $Type -DBUILD_SHARED_LIBS="$Shared"
+	}
+	catch
+	{
+		Write-Error "Build failed:`n$_"
+		return
+	}
+
+	Write-Host "Waiting for files to be written"
+	Start-Sleep 2.0
+
+	try
+	{
+		if ($Shared -eq "ON")
+		{
+			MoveDynamic $Path $Destination
+			$LibType = "Dynamic"
+		}
+		else
+		{
+			MoveStatic $Path $Destination
+			$LibType = "Static"
+		}
+	}
+	catch
+	{
+		Write-Warning "Unable to move files:`n$_"
+	}
+
+	Write-Host "Build completed: $LibType $Type $Arch`n" -ForegroundColor Green
+}
+
+function MoveStatic([string]$Path, [string]$Destination)
+{
+	Move-Item -Path $Path\{PROJECT}.lib -Destination $Destination\{PROJECT}s.lib -Force
+	Move-Item -Path $Path\{PROJECT}.pdb -Destination $Destination\{PROJECT}s.pdb -Force
+}
+
+function MoveDynamic([string]$Path, [string]$Destination)
+{
+	Move-Item -Path $Path\{PROJECT}.dll -Destination $Destination\{PROJECT}.dll -Force
+	Move-Item -Path $Path\{PROJECT}.exp -Destination $Destination\{PROJECT}.exp -Force
+	Move-Item -Path $Path\{PROJECT}.lib -Destination $Destination\{PROJECT}.lib -Force
+	Move-Item -Path $Path\{PROJECT}.pdb -Destination $Destination\{PROJECT}.pdb -Force
+}
+
+# -- Win32 --
+
+$Win32DebugPath = ".\bin\x86\Debug\Debug"
+$Win32ReleasePath = ".\bin\x86\Release\Debug"
+$Win32DebugLib = ".\lib\Win32\Debug"
+$Win32ReleaseLib = ".\lib\Win32\Release"
+
+if (-not (Test-Path -Path $Win32DebugLib))
+{
+	mkdir $Win32DebugLib
+}
+
+if (-not (Test-Path -Path $Win32ReleaseLib))
+{
+	mkdir $Win32ReleaseLib
+}
+
+# Debug Static
+Build x86 Debug OFF $Win32DebugPath $Win32DebugLib
+
+# Debug Dynamic
+Build x86 Debug ON $Win32DebugPath $Win32DebugLib
+
+# Release Static
+Build x86 Release OFF $Win32ReleasePath $Win32ReleaseLib
+
+# Release Dynamic
+Build x86 Release ON $Win32ReleasePath $Win32ReleaseLib
+
+Remove-Variable -Name Win32DebugPath
+Remove-Variable -Name Win32DebugLib
+Remove-Variable -Name Win32ReleasePath
+Remove-Variable -Name Win32ReleaseLib
+
+# -- x64 --
+
+$x64DebugPath = ".\bin\x64\Debug\Debug"
+$x64ReleasePath = ".\bin\x64\Release\Debug"
+$x64DebugLib = ".\lib\x64\Debug"
+$x64ReleaseLib = ".\lib\x64\Release"
+
+if (-not (Test-Path -Path $x64DebugLib))
+{
+	mkdir $x64DebugLib
+}
+
+if (-not (Test-Path -Path $x64ReleaseLib))
+{
+	mkdir $x64ReleaseLib
+}
+
+# Debug Static
+Build x64 Debug OFF $x64DebugPath $x64DebugLib
+
+# Debug Dynamic
+Build x64 Debug ON $x64DebugPath $x64DebugLib
+
+# Release Static
+Build x64 Release OFF $x64ReleasePath $x64ReleaseLib
+
+# Release Dynamic
+Build x64 Release ON $x64ReleasePath $x64ReleaseLib
+
+Remove-Variable -Name x64DebugPath
+Remove-Variable -Name x64DebugLib
+Remove-Variable -Name x64ReleasePath
+Remove-Variable -Name x64ReleaseLib
+

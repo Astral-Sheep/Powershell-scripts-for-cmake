@@ -1,0 +1,27 @@
+function Build($Arch, $Type)
+{
+	try
+	{
+		cmake-build -a $Arch -t $Type
+	}
+	catch
+	{
+		Write-Error "Build failed:`n$_"
+		return
+	}
+
+	Write-Host "Build completed: $Type $Arch`n" -ForegroundColor Green
+}
+
+# Debug Win32
+Build x86 Debug
+
+# Release Win32
+Build x86 Release
+
+# Debug x64
+Build x64 Debug
+
+# Release x64
+Build x64 Release
+

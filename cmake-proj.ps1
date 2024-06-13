@@ -1,6 +1,18 @@
 $projectName = ""
 $outputType = ""
 
+function NewItem($path)
+{
+	$null = New-Item $path
+	Write-Output "-- New item: $path"
+}
+
+function NewDir($path)
+{
+	$null = mkdir $path
+	Write-Output "-- New directory: $path"
+}
+
 for ($i = 0; $i -lt $args.Length; $i++)
 {
 	if ($args[$i] -eq "-n" -or $args[$i] -eq "--name")
@@ -58,19 +70,19 @@ if ($outputType -eq "")
 # Project directory
 if (-not (Test-Path .\$projectName))
 {
-	mkdir .\$projectName
+	NewDir .\$projectName
 }
 
 # Source directory
 if (-not (Test-Path .\$projectName\src))
 {
-	mkdir .\$projectName\src
+	NewDir .\$projectName\src
 }
 
 # Dependencies directory
 if (-not (Test-Path .\$projectName\dependencies))
 {
-	mkdir .\$projectName\dependencies
+	NewDir .\$projectName\dependencies
 }
 
 # CMakeLists
@@ -88,18 +100,18 @@ endif()
 
 	if (-not (Test-Path .\$projectName\lib))
 	{
-		mkdir .\$projectName\lib
+		NewDir .\$projectName\lib
 	}
 
 	if (-not (Test-Path .\$projectName\include))
 	{
-		mkdir .\$projectName\include
+		NewDir .\$projectName\include
 	}
 
 	if (-not (Test-Path .\$projectName\build.ps1))
 	{
-		New-Item .\$projectName\build.ps1
-		(Get-Content C:\powershell\build_lib) -replace "{PROJECT}", $projectName | Set-Content .\$projectName\build.ps1
+		NewItem .\$projectName\build.ps1
+		(Get-Content C:\powershell\cmake\build_lib) -replace "{PROJECT}", $projectName | Set-Content .\$projectName\build.ps1
 	}
 }
 else
@@ -108,7 +120,7 @@ else
 
 	if (-not (Test-Path -Path .\$projectName\src\Main.cpp))
 	{
-		New-Item .\$projectName\src\Main.cpp
+		NewItem .\$projectName\src\Main.cpp
 		Add-Content .\$projectName\src\Main.cpp @"
 #include <iostream>
 
@@ -123,14 +135,14 @@ int main()
 
 	if (-not (Test-Path .\$projectName\build.ps1))
 	{
-		New-Item .\$projectName\build.ps1
-		(Get-Content C:\powershell\build_exe) -replace "{PROJECT}", $projectName | Set-Content .\$projectName\build.ps1
+		NewItem .\$projectName\build.ps1
+		(Get-Content C:\powershell\cmake\build_exe) -replace "{PROJECT}", $projectName | Set-Content .\$projectName\build.ps1
 	}
 }
 
 if (-not (Test-Path -Path .\$projectName\CMakeLists.txt))
 {
-	New-Item .\$projectName\CMakeLists.txt
+	NewItem .\$projectName\CMakeLists.txt
 	Add-Content .\$projectName\CMakeLists.txt @"
 cmake_minimum_required(VERSION 3.15)
 project($projectName VERSION 1.0)
@@ -152,7 +164,7 @@ set(CMAKE_STATIC_LINKER_FLAGS "`${CMAKE_STATIC_LINKER_FLAGS} /ignore:4099")
 
 if (-not (Test-Path -Path .\$projectName\src\CMakeLists.txt))
 {
-	New-Item .\$projectName\src\CMakeLists.txt
+	NewItem .\$projectName\src\CMakeLists.txt
 	Add-Content .\$projectName\src\CMakeLists.txt @"
 target_sources(`${PROJECT_NAME} PRIVATE$(if ($outputType -eq "lib") { "" } else { "`r`n`tMain.cpp" })
 )

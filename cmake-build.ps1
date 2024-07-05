@@ -1,6 +1,6 @@
 $BuildType = ""
 $BuildArch = ""
-$AdditionalArgs = $null
+$AdditionalArgs = @()
 
 for ($i = 0; $i -lt $args.Length; $i++)
 {
@@ -84,7 +84,9 @@ $BuildPath = ".\bin\$BuildArch\$BuildType"
 Write-Output "-- Architecture: $CmakeArgA"
 Write-Output "-- Type: $BuildType"
 Write-Output "-- Build location: $BuildPath"
+Write-Output "-- Additional arguments: $AdditionalArgs"
 
 cmake -G "Visual Studio 16 2019" -A $CmakeArgA -S . -B $BuildPath -DCMAKE_BUILD_TYPE="$BuildType" $AdditionalArgs
+
 cmake --build $BuildPath
 

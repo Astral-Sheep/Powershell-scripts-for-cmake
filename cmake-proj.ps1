@@ -57,13 +57,13 @@ for ($i = 0; $i -lt $args.Length; $i++)
 
 if ($projectName -eq "")
 {
-	Write-Output "No project name set, defaulting to 'New Project'"
+	Write-Warning "No project name set, defaulting to 'New Project'"
 	$projectName = "NewProject"
 }
 
 if ($outputType -eq "")
 {
-	Write-Output "No output type set, defaulting to executable"
+	Write-Warning "No output type set, defaulting to executable"
 	$outputType = "exe"
 }
 
@@ -112,6 +112,12 @@ endif()
 	{
 		NewItem .\$projectName\build.ps1
 		(Get-Content C:\powershell\cmake\build_lib) -replace "{PROJECT}", $projectName | Set-Content .\$projectName\build.ps1
+	}
+
+	if (-not (Test-Path .\$projectName\include.ps1))
+	{
+		NewItem .\$projectName\include.ps1
+		(Get-Content C:\powershell\cmake\include) -replace "{INCLUDE}", $projectName.ToLower() | Set-Content .\$projectName\include.ps1
 	}
 }
 else
@@ -183,7 +189,7 @@ if (-not (Test-Path -Path .\$projectName\.gitignore))
 .cache/
 bin/
 build.ps1
-compile_commands.json
+$(if ($outputType -eq "lib") { "include.ps1`n" } else { "" })compile_commands.json
 "@
 }
 

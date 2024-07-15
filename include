@@ -1,0 +1,47 @@
+if (-not (Test-Path -Path .\include))
+{
+	$null = mkdir .\include
+}
+
+if (-not (Test-Path -Path .\src))
+{
+	exit
+}
+
+$Sources = {}
+$Sources = Get-ChildItem -Path .\src -Recurse -Name -Include *.hpp, *.h
+
+foreach ($Source in $Sources)
+{
+	$IncludePath = $Source
+
+	if ($IncludePath.IndexOf("vendors\") -eq 0)
+	{
+		$IncludePath = $Source.Substring(8, $Source.Length - 8)
+		$IncludeFolderIndex = $IncludePath.LastIndexOf("include\")
+
+		if ((Get-ChildItem -Path (".\src\vendors\$IncludePath").Substring(0, 14 + $IncludePath.IndexOf("\")) -Name).Contains("include") -and (-not $IncludePath.Contains("include\")))
+		{
+			continue
+		}
+
+		if ($IncludeFolderIndex -gt -1)
+		{
+			$IncludePath = $IncludePath.Substring($IncludeFolderIndex + 8, $IncludePath.Length - $IncludeFolderIndex - 8)
+		}
+	}
+	else
+	{
+		$IncludePath = "{INCLUDE}\" + $Source
+	}
+
+	$Dir = $IncludePath.Substring(0, $IncludePath.LastIndexOf("\"))
+
+	if (-not (Test-Path -Path .\include\$Dir))
+	{
+		$null = mkdir .\include\$Dir
+	}
+
+	Copy-Item -Path .\src\$Source -Destination .\include\$IncludePath
+}
+

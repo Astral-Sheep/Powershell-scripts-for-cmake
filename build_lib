@@ -7,7 +7,7 @@ function Build($Arch, $Type, $Shared, [string]$Path, [string]$Destination)
 	catch
 	{
 		Write-Error "Build failed:`n$_"
-		return
+		exit
 	}
 
 	Write-Host "Waiting for files to be written"

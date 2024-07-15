@@ -7,7 +7,7 @@ function Build($Arch, $Type)
 	catch
 	{
 		Write-Error "Build failed:`n$_"
-		return
+		exit
 	}
 
 	Write-Host "Build completed: $Type $Arch`n" -ForegroundColor Green

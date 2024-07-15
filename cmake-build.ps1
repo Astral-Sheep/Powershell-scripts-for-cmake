@@ -1,6 +1,19 @@
 $BuildType = ""
 $BuildArch = ""
 $AdditionalArgs = @()
+$Silent = $false
+
+function PrintMsg($msg)
+{
+	if ($Silent)
+	{
+		$null = Write-Output $msg
+	}
+	else
+	{
+		Write-Ouput $msg
+	}
+}
 
 for ($i = 0; $i -lt $args.Length; $i++)
 {
@@ -29,6 +42,10 @@ for ($i = 0; $i -lt $args.Length; $i++)
 		}
 
 		$i++
+	}
+	elseif ($args[$i] -eq "-s" -or $args[$i] -eq "--silent")
+	{
+		$Silent = $true
 	}
 	else
 	{
@@ -81,12 +98,19 @@ switch ($BuildArch)
 
 $BuildPath = ".\bin\$BuildArch\$BuildType"
 
-Write-Output "-- Architecture: $CmakeArgA"
-Write-Output "-- Type: $BuildType"
-Write-Output "-- Build location: $BuildPath"
-Write-Output "-- Additional arguments: $AdditionalArgs"
+PrintMsg "-- Architecture: $CmakeArgA"
+PrintMsg "-- Type: $BuildType"
+PrintMsg "-- Build location: $BuildPath"
+PrintMsg "-- Additional arguments: $AdditionalArgs"
 
-cmake -G "Visual Studio 16 2019" -A $CmakeArgA -S . -B $BuildPath -DCMAKE_BUILD_TYPE="$BuildType" $AdditionalArgs
-
-cmake --build $BuildPath
+if ($Silent)
+{
+	$null = cmake -G "Visual Studio 16 2019" -A $CmakeArgA -S . -B $BuildPath -DCMAKE_BUILD_TYPE="$BuildType" $AdditionalArgs
+	$null = cmake --build $BuildPath
+}
+else
+{
+	cmake -G "Visual Studio 16 2019" -A $CmakeArgA -S . -B $BuildPath -DCMAKE_BUILD_TYPE="$BuildType" $AdditionalArgs
+	cmake --build $BuildPath
+}
 
